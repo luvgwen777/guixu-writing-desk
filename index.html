@@ -2,49 +2,1204 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#111111" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="归墟写作台" />
+  <link rel="manifest" href="./manifest.webmanifest" />
   <title>归墟写作台</title>
+
   <style>
-    body {
+    :root {
+      --bg: #101010;
+      --panel: #181818;
+      --panel2: #222;
+      --text: #f3f3f3;
+      --muted: #9a9a9a;
+      --line: #333;
+      --accent: #b98b45;
+      --accent2: #6f4a1e;
+      --danger: #b94b4b;
+      --blue: #557cff;
+      --ok: #4fa36b;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
       margin: 0;
+      padding: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
-      background: #111;
-      color: #f2f2f2;
-      padding: 24px;
+      overflow: hidden;
     }
-    .card {
-      background: #1c1c1c;
-      border: 1px solid #333;
-      border-radius: 18px;
-      padding: 22px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+
+    body {
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
     }
-    h1 {
-      margin-top: 0;
-      font-size: 28px;
+
+    button, input, textarea, select {
+      font-family: inherit;
     }
-    p {
-      line-height: 1.8;
-      color: #ccc;
+
+    .app {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(185,139,69,0.18), transparent 28%),
+        radial-gradient(circle at 100% 10%, rgba(85,124,255,0.10), transparent 24%),
+        var(--bg);
     }
-    .tag {
-      display: inline-block;
-      margin-top: 12px;
-      padding: 8px 12px;
+
+    .topbar {
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(16,16,16,0.94);
+      backdrop-filter: blur(14px);
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 21px;
+      letter-spacing: 1px;
+    }
+
+    .brand span {
+      display: block;
+      margin-top: 3px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      color: var(--text);
       border-radius: 999px;
-      background: #2e5cff;
-      color: white;
+      padding: 8px 11px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-color: rgba(255,255,255,0.16);
+      color: #fff;
+    }
+
+    .btn.blue {
+      background: rgba(85,124,255,0.18);
+      border-color: rgba(85,124,255,0.5);
+      color: #c8d3ff;
+    }
+
+    .btn.danger {
+      background: rgba(185,75,75,0.17);
+      border-color: rgba(185,75,75,0.55);
+      color: #ffc1c1;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .search-row input {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 13px;
+      outline: none;
       font-size: 14px;
+    }
+
+    .main {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(16,16,16,0.78);
+    }
+
+    .tab {
+      flex: 0 0 auto;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      color: #fff;
+      border-color: rgba(185,139,69,0.85);
+      background: rgba(185,139,69,0.18);
+    }
+
+    .content {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 36% 64%;
+    }
+
+    .sidebar {
+      min-height: 0;
+      border-right: 1px solid var(--line);
+      background: rgba(18,18,18,0.86);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .doc-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .doc-item {
+      width: 100%;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+      padding: 10px;
+      border-radius: 13px;
+      margin-bottom: 7px;
+      cursor: pointer;
+    }
+
+    .doc-item.active {
+      background: rgba(185,139,69,0.17);
+      border-color: rgba(185,139,69,0.48);
+    }
+
+    .doc-title {
+      font-size: 14px;
+      line-height: 1.4;
+      font-weight: 650;
+    }
+
+    .doc-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .side-actions {
+      padding: 10px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .editor {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      background: rgba(13,13,13,0.9);
+    }
+
+    .editor-head {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .editor-head input {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 11px 12px;
+      outline: none;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    textarea.editor-text {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      border: none;
+      outline: none;
+      resize: none;
+      background: transparent;
+      color: var(--text);
+      padding: 14px;
+      font-size: 16px;
+      line-height: 1.75;
+    }
+
+    .empty {
+      padding: 24px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .modal-mask {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: flex-end;
+      background: rgba(0,0,0,0.66);
+      z-index: 50;
+    }
+
+    .modal {
+      width: 100%;
+      max-height: 87vh;
+      overflow-y: auto;
+      background: #171717;
+      border-top: 1px solid var(--line);
+      border-radius: 22px 22px 0 0;
+      padding: 16px;
+      box-shadow: 0 -12px 40px rgba(0,0,0,0.45);
+    }
+
+    .modal h2 {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    .modal p {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .modal textarea {
+      width: 100%;
+      min-height: 280px;
+      height: 46vh;
+      border: 1px solid var(--line);
+      background: #101010;
+      color: var(--text);
+      border-radius: 14px;
+      padding: 12px;
+      outline: none;
+      resize: vertical;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .hidden-file {
+      display: none;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(20px + env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      background: rgba(30,30,30,0.96);
+      color: #fff;
+      border: 1px solid var(--line);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      display: none;
+      z-index: 90;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.38);
+      max-width: 86vw;
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      .content {
+        grid-template-columns: 1fr;
+        grid-template-rows: 34% 66%;
+      }
+
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .doc-list {
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 8px;
+      }
+
+      .doc-item {
+        min-width: 156px;
+        margin-bottom: 0;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .brand h1 {
+        font-size: 18px;
+      }
+
+      .brand span {
+        font-size: 11px;
+      }
+
+      .btn {
+        font-size: 12px;
+        padding: 7px 9px;
+      }
+
+      .content {
+        grid-template-rows: 31% 69%;
+      }
+
+      textarea.editor-text {
+        font-size: 16px;
+      }
     }
   </style>
 </head>
+
 <body>
-  <div class="card">
-    <h1>归墟写作台</h1>
-    <p>如果你看到这个页面，说明网页 App 已经成功运行。</p>
-    <p>下一步，我们会把它升级成真正的小说项目管理工具。</p>
-    <div class="tag">PWA 测试成功</div>
+  <div class="app">
+    <header class="topbar">
+      <div class="title-row">
+        <div class="brand">
+          <h1>归墟写作台</h1>
+          <span>周军 · 睚眦印 · 哈尔滨冰城</span>
+        </div>
+        <div class="top-actions">
+          <button class="btn primary" onclick="openPromptModal()">生成提示词</button>
+          <button class="btn blue" onclick="exportBackup()">导出备份</button>
+          <button class="btn" onclick="document.getElementById('importFile').click()">导入</button>
+        </div>
+      </div>
+      <div class="search-row">
+        <input id="searchInput" placeholder="搜索设定、角色、章节……" oninput="renderDocList()" />
+      </div>
+    </header>
+
+    <main class="main">
+      <nav id="tabs" class="tabs"></nav>
+
+      <section class="content">
+        <aside class="sidebar">
+          <div id="docList" class="doc-list"></div>
+          <div class="side-actions">
+            <button class="btn primary" onclick="createDoc()">新建</button>
+            <button class="btn danger" onclick="deleteDoc()">删除</button>
+            <button class="btn" onclick="duplicateDoc()">复制本文</button>
+          </div>
+        </aside>
+
+        <section id="editor" class="editor"></section>
+      </section>
+    </main>
   </div>
+
+  <div id="promptModal" class="modal-mask">
+    <div class="modal">
+      <h2>AI 写作提示词</h2>
+      <p>下面内容已经自动拼好。点“复制提示词”，再粘给 ChatGPT / Kimi / 豆包 / Claude。</p>
+      <textarea id="promptText"></textarea>
+      <div class="modal-actions">
+        <button class="btn primary" onclick="copyPrompt()">复制提示词</button>
+        <button class="btn blue" onclick="savePromptAsDoc()">存为提示词文档</button>
+        <button class="btn" onclick="closePromptModal()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <input id="importFile" class="hidden-file" type="file" accept=".json,application/json" onchange="importBackup(event)" />
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const STORAGE_KEY = "guixu-writing-desk-data-v1";
+
+    const categories = [
+      "总览",
+      "世界观",
+      "力量体系",
+      "角色",
+      "剧情",
+      "正文",
+      "风格",
+      "提示词"
+    ];
+
+    let state = loadState();
+    let currentCategory = state.currentCategory || "总览";
+    let currentDocId = state.currentDocId || null;
+    let saveTimer = null;
+
+    function uid() {
+      return "doc_" + Date.now() + "_" + Math.random().toString(16).slice(2);
+    }
+
+    function nowText() {
+      const d = new Date();
+      const pad = n => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function defaultDocs() {
+      return [
+        {
+          id: uid(),
+          category: "总览",
+          title: "00-项目说明",
+          content:
+`《归墟写作台》
+
+这是为长篇小说项目准备的手机写作台。
+
+使用方式：
+1. 世界观、角色、剧情、正文、风格分开管理。
+2. 每次写作前，先整理本章任务。
+3. 点击“生成提示词”，复制给 AI。
+4. AI 输出后，粘回“正文”分类。
+5. 每天写完点一次“导出备份”。
+
+重要：
+第一版数据保存在当前手机浏览器本地。
+不要清理 Safari 网站数据。
+请经常导出备份到 iCloud 或文件 App。`,
+          updatedAt: nowText()
+        },
+        {
+          id: uid(),
+          category: "世界观",
+          title: "归墟",
+          content:
+`归墟：
+
+尚未完全公开的底层世界机制。
+
+写作要求：
+- 不要一开始解释清楚。
+- 通过副本、遗响、梦境、寒冷、饥饿、错位感慢慢显露。
+- 归墟不能像游戏系统一样直白，要有神秘、古旧、压迫感。
+- 它像水底、像旧朝代的井、像埋在历史里的胃。`,
+          updatedAt: nowText()
+        },
+        {
+          id: uid(),
+          category: "世界观",
+          title: "1932哈尔滨冰城",
+          content:
+`初始副本：1932年哈尔滨冰城。
+
+基调：
+- 冷。
+- 饥饿。
+- 街巷有煤烟、马粪、冻硬的雪、洋楼、旧旗、巡警、暗处的人。
+- 不要把背景写成旅游介绍，要写成能冻伤人的地方。
+
+可用元素：
+- 中东铁路
+- 俄式建筑
+- 冻江
+- 破旅馆
+- 警察厅
+- 当铺
+- 烟馆
+- 教堂钟声
+- 雪夜枪声
+- 黑市粮票
+- 乱世里的民间门道`,
+          updatedAt: nowText()
+        },
+        {
+          id: uid(),
+          category: "力量体系",
+          title: "基础术语",
+          content:
+`力量体系关键词：
+
+- 归墟
+- 渊潭
+- 问津者
+- 遗响
+- 煞·兑·睚眦
+- 冻馁限制
+
+写作要求：
+1. 术语可以出现，但不要一次解释完。
+2. 能用事件表现的，就不要用旁白说明。
+3. 规则要冷硬，有代价。
+4. 主角获得力量时，不要像升级领奖励。`,
+          updatedAt: nowText()
+        },
+        {
+          id: uid(),
+          category: "力量体系",
+          title: "睚眦印",
+          content:
+`睚眦印 / 青铜睚眦印：
+
+来源：
+祖传青铜兽面带扣。
+
+方向：
+- 好杀
+- 好斗
+- 睚眦必报
+- 刀剑吞口
+- 金铁兵刃
+- 睚眦兽相
+
+设定原则：
+1. 它不是普通法宝。
+2. 它可以逐渐融入周军身体。
+3. 后续形成类似替身/兽相的自身力量。
+4. 不要一直写成手里拿着印章砸人。
+5. 睚眦能力要和金铁、兵刃、杀伐、复仇、伤痕回应相关。
+
+可表现方式：
+- 青铜扣发热。
+- 兽面在皮肤下游动。
+- 伤口边缘有金铁色。
+- 刀剑靠近时出现吞咬感。
+- 受辱、受伤、欠债、结仇后，睚眦印会记住。`,
+          updatedAt: nowText()
+        },
+        {
+          id: uid(),
+          category: "角色",
+          title: "周军",
+          content:
+`姓名：周军
+
+出身：
+山东临邑，“神枪陈”传人。
+
+身体状况：
+患多发性大动脉炎，又称无脉症。
+在故事体系里对应“锁龙脉”。
+
+人物气质：
+- 沉默
+- 耐疼
+- 警觉
+- 不轻信人
+- 不爱解释
+- 身上有旧江湖传人的底子
+
+武艺背景：
+大枪可作为背景传承保留，但不作为唯一主武器。
+
+核心力量：
+睚眦印 / 青铜睚眦印。
+
+写作注意：
+1. 周军不要话多。
+2. 不要让他轻易热血。
+3. 他的狠来自忍耐、病痛、债、仇、命硬。
+4. 病痛要真实影响行动。
+5. 力量出现时要有代价。`,
+          updatedAt: nowText()
+        },
+        {
+          id: uid(),
+          category: "剧情",
+          title: "总纲",
+          content:
+`总纲待完善。
+
+当前方向：
+主角周军因“锁龙脉”卷入归墟。
+初始副本为1932年哈尔滨冰城。
+在冻馁、追杀、旧城怪事中，青铜兽面带扣逐渐显露为睚眦印。
+
+核心看点：
+- 历史寒意
+- 民间传承
+- 无限流副本
+- 国风神话力量
+- 病骨与凶性的冲突
+- 睚眦必报的成长路线`,
+          updatedAt: nowText()
+        },
+        {
+          id: uid(),
+          category: "剧情",
+          title: "第一卷-哈尔滨冰城",
+          content:
+`第一卷：哈尔滨冰城
+
+氛围：
+冷、饿、乱、暗处有人盯着。
+
+可推进线：
+1. 周军抵达冰城。
+2. 身体病症在寒冷中加剧。
+3. 青铜兽面带扣第一次异常。
+4. 发现归墟遗响。
+5. 被卷入第一场不可解释的杀局。
+6. 睚眦印第一次记仇。
+7. 周军意识到副本规则和“冻馁限制”有关。
+
+要求：
+节奏克制，不要过快揭示世界观。`,
+          updatedAt: nowText()
+        },
+        {
+          id: uid(),
+          category: "正文",
+          title: "第001章",
+          content:
+`这里粘贴或撰写第001章正文。`,
+          updatedAt: nowText()
+        },
+        {
+          id: uid(),
+          category: "正文",
+          title: "第002章",
+          content:
+`这里粘贴或撰写第002章正文。`,
+          updatedAt: nowText()
+        },
+        {
+          id: uid(),
+          category: "风格",
+          title: "写作要求",
+          content:
+`文风要求：
+- 冷硬
+- 粗粝
+- 克制
+- 节奏不要过快
+- 少解释，多让动作、环境和细节说话
+- 避免网文爽点堆砌
+- 避免AI腔
+- 章节长度约4000-5000字
+
+叙事要求：
+1. 先写人怎么活，再写力量怎么来。
+2. 环境要有触感，冷、饿、疼、铁锈、煤烟、雪泥。
+3. 主角的身体病痛要影响行动。
+4. 不要把设定一次性讲透。
+5. 悬疑和压迫感要慢慢压下来。`,
+          updatedAt: nowText()
+        },
+        {
+          id: uid(),
+          category: "风格",
+          title: "禁用句式",
+          content:
+`明确避免：
+- 不是……而是……
+- 他知道……
+- 仿佛……
+- 某种意义上……
+- 命运的齿轮开始转动
+- 一股神秘力量
+- 前所未有的感觉
+- 这一刻，他终于明白
+- 空气仿佛凝固
+- 他不知道的是
+
+尽量避免：
+- 大段解释设定
+- 连续排比
+- 过度心理独白
+- 过度总结式旁白
+- 装腔的哲理句`,
+          updatedAt: nowText()
+        },
+        {
+          id: uid(),
+          category: "提示词",
+          title: "写正文提示词模板",
+          content:
+`请根据我提供的小说设定写正文。
+
+要求：
+1. 文风冷硬、粗粝、克制。
+2. 避免AI腔，避免“不是……而是……”句式。
+3. 节奏不要过快。
+4. 少解释设定，多用动作、环境、细节推进。
+5. 主角周军沉默、耐疼、警觉，不要话多。
+6. 睚眦印相关表现要贴合睚眦：好杀、好斗、睚眦必报、刀剑吞口、金铁兵刃。
+7. 章节约4000-5000字。
+
+本章任务：
+【在这里填写】`,
+          updatedAt: nowText()
+        }
+      ];
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        const docs = defaultDocs();
+        return {
+          docs,
+          currentCategory: "总览",
+          currentDocId: docs[0].id
+        };
+      }
+
+      try {
+        const data = JSON.parse(raw);
+        if (!data.docs || !Array.isArray(data.docs)) throw new Error("bad data");
+        return data;
+      } catch (e) {
+        const docs = defaultDocs();
+        return {
+          docs,
+          currentCategory: "总览",
+          currentDocId: docs[0].id
+        };
+      }
+    }
+
+    function saveState() {
+      state.currentCategory = currentCategory;
+      state.currentDocId = currentDocId;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function autoSave() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        saveState();
+        renderDocList();
+        updateStatsOnly();
+        toast("已自动保存");
+      }, 350);
+    }
+
+    function toast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.style.display = "block";
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        el.style.display = "none";
+      }, 1600);
+    }
+
+    function getCurrentDoc() {
+      return state.docs.find(d => d.id === currentDocId) || null;
+    }
+
+    function countText(text) {
+      const noSpace = (text || "").replace(/\s/g, "");
+      return noSpace.length;
+    }
+
+    function renderTabs() {
+      const tabs = document.getElementById("tabs");
+      tabs.innerHTML = "";
+
+      categories.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.className = "tab" + (cat === currentCategory ? " active" : "");
+        btn.textContent = cat;
+        btn.onclick = () => {
+          currentCategory = cat;
+          const first = filteredDocs()[0] || state.docs.find(d => d.category === cat);
+          currentDocId = first ? first.id : null;
+          saveState();
+          render();
+        };
+        tabs.appendChild(btn);
+      });
+    }
+
+    function filteredDocs() {
+      const q = document.getElementById("searchInput")?.value?.trim() || "";
+      let docs = state.docs.filter(d => d.category === currentCategory);
+
+      if (q) {
+        docs = state.docs.filter(d => {
+          return (
+            d.title.includes(q) ||
+            d.category.includes(q) ||
+            (d.content || "").includes(q)
+          );
+        });
+      }
+
+      return docs.sort((a, b) => a.title.localeCompare(b.title, "zh-CN"));
+    }
+
+    function renderDocList() {
+      const list = document.getElementById("docList");
+      const docs = filteredDocs();
+
+      list.innerHTML = "";
+
+      if (docs.length === 0) {
+        list.innerHTML = `<div class="empty">没有找到文档。可以点“新建”。</div>`;
+        return;
+      }
+
+      if (!docs.some(d => d.id === currentDocId)) {
+        currentDocId = docs[0].id;
+      }
+
+      docs.forEach(doc => {
+        const item = document.createElement("button");
+        item.className = "doc-item" + (doc.id === currentDocId ? " active" : "");
+        item.onclick = () => {
+          currentDocId = doc.id;
+          saveState();
+          renderEditor();
+          renderDocList();
+        };
+        item.innerHTML = `
+          <div class="doc-title">${escapeHtml(doc.title)}</div>
+          <div class="doc-meta">${escapeHtml(doc.category)} · ${countText(doc.content)}字 · ${escapeHtml(doc.updatedAt || "")}</div>
+        `;
+        list.appendChild(item);
+      });
+
+      saveState();
+    }
+
+    function renderEditor() {
+      const editor = document.getElementById("editor");
+      const doc = getCurrentDoc();
+
+      if (!doc) {
+        editor.innerHTML = `<div class="empty">当前分类还没有文档。点左下角“新建”。</div>`;
+        return;
+      }
+
+      editor.innerHTML = `
+        <div class="editor-head">
+          <input id="docTitleInput" value="${escapeAttr(doc.title)}" oninput="updateTitle(this.value)" />
+          <div class="stats">
+            <span id="wordCount">字数：${countText(doc.content)}</span>
+            <span>分类：${escapeHtml(doc.category)}</span>
+            <span id="saveTime">更新：${escapeHtml(doc.updatedAt || "")}</span>
+          </div>
+        </div>
+        <textarea class="editor-text" id="docContentInput" oninput="updateContent(this.value)">${escapeHtml(doc.content || "")}</textarea>
+      `;
+    }
+
+    function updateTitle(value) {
+      const doc = getCurrentDoc();
+      if (!doc) return;
+      doc.title = value || "未命名";
+      doc.updatedAt = nowText();
+      autoSave();
+    }
+
+    function updateContent(value) {
+      const doc = getCurrentDoc();
+      if (!doc) return;
+      doc.content = value;
+      doc.updatedAt = nowText();
+      updateStatsOnly();
+      autoSave();
+    }
+
+    function updateStatsOnly() {
+      const doc = getCurrentDoc();
+      if (!doc) return;
+
+      const wc = document.getElementById("wordCount");
+      const st = document.getElementById("saveTime");
+
+      if (wc) wc.textContent = "字数：" + countText(doc.content);
+      if (st) st.textContent = "更新：" + (doc.updatedAt || "");
+    }
+
+    function createDoc() {
+      const title = prompt("新文档标题：", currentCategory === "正文" ? "第003章" : "新文档");
+      if (!title) return;
+
+      const doc = {
+        id: uid(),
+        category: currentCategory,
+        title,
+        content: "",
+        updatedAt: nowText()
+      };
+
+      state.docs.push(doc);
+      currentDocId = doc.id;
+      saveState();
+      render();
+      toast("已新建文档");
+    }
+
+    function deleteDoc() {
+      const doc = getCurrentDoc();
+      if (!doc) return;
+
+      if (!confirm(`确定删除《${doc.title}》吗？删除后无法从 App 内恢复。建议先导出备份。`)) return;
+
+      state.docs = state.docs.filter(d => d.id !== doc.id);
+      const next = state.docs.find(d => d.category === currentCategory) || state.docs[0];
+      currentDocId = next ? next.id : null;
+      saveState();
+      render();
+      toast("已删除");
+    }
+
+    function duplicateDoc() {
+      const doc = getCurrentDoc();
+      if (!doc) return;
+
+      const copy = {
+        id: uid(),
+        category: doc.category,
+        title: doc.title + "-副本",
+        content: doc.content,
+        updatedAt: nowText()
+      };
+
+      state.docs.push(copy);
+      currentDocId = copy.id;
+      saveState();
+      render();
+      toast("已复制本文");
+    }
+
+    function buildPrompt() {
+      const get = (title) => {
+        const doc = state.docs.find(d => d.title === title);
+        return doc ? doc.content : "";
+      };
+
+      const current = getCurrentDoc();
+      const style = get("写作要求");
+      const banned = get("禁用句式");
+      const zhoujun = get("周军");
+      const yazi = get("睚眦印");
+      const terms = get("基础术语");
+      const ice = get("1932哈尔滨冰城");
+      const volume = get("第一卷-哈尔滨冰城");
+
+      let recentText = "";
+      const bodyDocs = state.docs
+        .filter(d => d.category === "正文")
+        .sort((a, b) => a.title.localeCompare(b.title, "zh-CN"));
+
+      if (bodyDocs.length) {
+        const last = bodyDocs[bodyDocs.length - 1];
+        recentText = `【最近正文参考：${last.title}】\n${last.content.slice(-1800)}`;
+      }
+
+      return `你是我的长篇网文写作助手。请严格按以下项目设定写作。
+
+【文风要求】
+${style}
+
+【禁用与避雷】
+${banned}
+
+【主角设定】
+${zhoujun}
+
+【睚眦印设定】
+${yazi}
+
+【力量体系】
+${terms}
+
+【初始副本】
+${ice}
+
+【当前卷剧情】
+${volume}
+
+${recentText}
+
+【当前正在编辑的文档】
+标题：${current ? current.title : "无"}
+分类：${current ? current.category : "无"}
+内容：
+${current ? current.content : "无"}
+
+【写作任务】
+请根据以上设定继续创作或完善当前章节。
+要求节奏克制，环境有触感，人物少解释，多通过行动、寒冷、疼痛、饥饿、金铁与旧城细节推进。
+避免“不是……而是……”等AI腔句式。`;
+    }
+
+    function openPromptModal() {
+      document.getElementById("promptText").value = buildPrompt();
+      document.getElementById("promptModal").style.display = "flex";
+    }
+
+    function closePromptModal() {
+      document.getElementById("promptModal").style.display = "none";
+    }
+
+    async function copyPrompt() {
+      const text = document.getElementById("promptText").value;
+
+      try {
+        await navigator.clipboard.writeText(text);
+        toast("提示词已复制");
+      } catch (e) {
+        const area = document.getElementById("promptText");
+        area.focus();
+        area.select();
+        document.execCommand("copy");
+        toast("已尝试复制");
+      }
+    }
+
+    function savePromptAsDoc() {
+      const text = document.getElementById("promptText").value;
+      const doc = {
+        id: uid(),
+        category: "提示词",
+        title: "生成提示词-" + nowText(),
+        content: text,
+        updatedAt: nowText()
+      };
+
+      state.docs.push(doc);
+      currentCategory = "提示词";
+      currentDocId = doc.id;
+      saveState();
+      closePromptModal();
+      render();
+      toast("已存为提示词文档");
+    }
+
+    function exportBackup() {
+      saveState();
+
+      const data = {
+        app: "归墟写作台",
+        version: "1.0",
+        exportedAt: nowText(),
+        state
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "guixu-writing-backup-" + new Date().toISOString().slice(0,10) + ".json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      toast("备份已导出");
+    }
+
+    function importBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          const imported = data.state || data;
+
+          if (!imported.docs || !Array.isArray(imported.docs)) {
+            throw new Error("格式不正确");
+          }
+
+          if (!confirm("导入会覆盖当前写作台内容。确定继续吗？")) return;
+
+          state = imported;
+          currentCategory = state.currentCategory || "总览";
+          currentDocId = state.currentDocId || (state.docs[0] && state.docs[0].id);
+          saveState();
+          render();
+          toast("导入成功");
+        } catch (err) {
+          alert("导入失败：备份文件格式不正确。");
+        } finally {
+          event.target.value = "";
+        }
+      };
+
+      reader.readAsText(file);
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function escapeAttr(str) {
+      return escapeHtml(str).replaceAll("\n", " ");
+    }
+
+    function render() {
+      renderTabs();
+      renderDocList();
+      renderEditor();
+    }
+
+    window.addEventListener("load", () => {
+      render();
+
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      }
+    });
+  </script>
 </body>
 </html>
-
