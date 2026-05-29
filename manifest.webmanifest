@@ -1,0 +1,23 @@
+{
+  "name": "归墟写作台",
+  "short_name": "归墟",
+  "description": "为长篇小说创作准备的手机写作项目管理工具",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://dummyimage.com/192x192/111111/ffffff.png&text=%E5%BD%92",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://dummyimage.com/512x512/111111/ffffff.png&text=%E5%A2%9F",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
